@@ -1,27 +1,34 @@
 # Project progress
 
+Updated 2026-11-18 from local source inspection and executed checks.
+
 ## Done
 
-- The CLI and Python pipeline handle audio preparation, English and Hinglish transcription, notes, and transcript-based chat.
-- The HTTP adapter and Next.js workspace have code for uploads, YouTube analysis, job status, cancellation, and chat. The frontend also includes an offline walkthrough.
-- The HTTP adapter has a test suite at `tests/test_api_server.py` with model calls replaced by fixtures.
+- Created Git checkpoint `bbb7351` before resuming. Required private and generated paths are ignored.
+- Added the root AGENTS.md with project structure, run commands, and hardware and approval rules.
+- Existing code implements video/audio preparation, Whisper English and Sarvam Hinglish transcription, summary, actions, decisions, questions, and Chroma-backed RAG chat.
+- The HTTP adapter and Next.js workspace implement uploads, YouTube inputs, jobs, cancellation, notes, and chat. The frontend also has an offline walkthrough.
+- Confirmed api_server.py, frontend/.env.example, and frontend/src/lib/api.ts all use http://127.0.0.1:8001. Corrected the stale frontend README from 8000 to 8001.
+- Removed the hardcoded sample URL from test.py. It now requires an explicit source and optional --language; importing it performs no processing. No file was deleted.
+- No tracked file contains VUvk71bw-wU. The audio utility has no automatic download at import; its regression test passed.
 
-## Broken or inconsistent
+## Verified results
 
-- The frontend README lists port 8000. The server default and the frontend example and client use 8001.
-- The requested root-level pytest path does not exist. The suite is under `tests/`.
-- The standalone `test.py` script starts processing a hardcoded YouTube link at module scope.
-
-## Left to verify
-
-- Run the API tests and the Next.js build and address any failures.
-- Locate the reported sample video download and remove any automatic test download.
-- Start the API and frontend and check requests from the frontend origin.
-
-## Verification on 2026-11-18
-
-- `python -m pytest test_api_server.py` could not run: pytest is not installed in the active .venv. Approval to install it is pending.
-- `python -m unittest -v tests.test_api_server`: all 6 tests passed.
+- Installed pytest into the existing .venv with user approval using uv, since the environment has no pip module.
+- `python -m pytest tests/test_api_server.py`: 6 passed.
+- `python -m pytest`: 6 passed; discovery performed no video download.
+- `python -m unittest -v tests.test_api_server`: 6 passed.
 - `npm run build` in frontend: passed compilation, TypeScript, and static generation.
-- Server, frontend example environment, and frontend client all use http://127.0.0.1:8001.
-- No tracked file contains VUvk71bw-wU. The audio utility has no download at module scope; its import-side-effect regression test passed.
+- `python test.py --help` and `python -c "import test"`: passed without processing a recording.
+- Started the Python API at http://127.0.0.1:8001 and Next.js dev server at http://127.0.0.1:3000.
+- Headless Chrome loaded /workspace/ from port 3000, fetched API health (200, ready), and used the actual api.ts client for a cross-origin JSON POST. The API returned the expected 410 for an expired chat session, confirming browser connectivity and CORS.
+- Startup logs, process IDs, and the browser connectivity check are in ignored .web_uploads/. Next.js generated frontend/AGENTS.md and updated next-env.d.ts during startup.
+
+## Known issues and remaining work
+
+- The literal command `python -m pytest test_api_server.py` fails because there is no root-level test file. Use the verified tests/ path above.
+- There is no root README.md; current usage documentation is frontend/README.md and AGENTS.md.
+- Source inspection found load_rag_chain() calls get_retriever() without its required vector-store argument. This separate saved-store loader is not used by the tested API path and has not been exercised or repaired.
+- requirements.txt does not explicitly list langchain-openai, langchain-chroma, or langchain-text-splitters, although all three are installed in the current .venv. A fresh-environment installation has not been verified.
+- Real English/Hinglish transcription, provider credentials, model downloads, and a complete live video-to-chat run remain unverified; API tests use fixtures and connectivity checks make no model calls.
+- API chat sessions are held in memory and end on server restart. Production deployment configuration and persistent session recovery remain future work.

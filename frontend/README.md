@@ -19,7 +19,7 @@ For real video analysis, open a second terminal in the project root:
 .\.venv\Scripts\python.exe api_server.py
 ```
 
-The adapter uses the project’s existing dependencies, FFmpeg, Whisper, and configured provider credentials. Model calls happen only when you analyze a recording or ask about a real analyzed video. The server listens on 127.0.0.1:8000. For a different server address, copy `.env.example` to `.env.local`, change `NEXT_PUBLIC_ASSISTANT_API_URL`, and restart Next.js.
+The adapter uses the project’s existing dependencies, FFmpeg, Whisper, and configured provider credentials. Model calls happen only when you analyze a recording or ask about a real analyzed video. The server listens on 127.0.0.1:8001. For a different server address, copy `.env.example` to `.env.local`, change `NEXT_PUBLIC_ASSISTANT_API_URL`, and restart Next.js.
 
 ## Included interactions
 
