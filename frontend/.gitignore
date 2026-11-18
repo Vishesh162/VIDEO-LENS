@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+.cache/
+*.tsbuildinfo
+.env*
+!.env.example
+.taste-skill/chrome*/
+.taste-skill/shots/

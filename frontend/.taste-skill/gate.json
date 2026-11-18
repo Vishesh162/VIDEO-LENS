@@ -1,0 +1,311 @@
+{
+ "start": "2026-11-18T07:43:29.151Z",
+ "round": 2,
+ "idle": 0,
+ "errors": 0,
+ "status": "fail",
+ "history": [
+  {
+   "at": "2026-11-18T09:53:30.135Z",
+   "mode": "manual",
+   "status": "fail",
+   "fails": 8,
+   "round": 1,
+   "reused": false,
+   "stopHookActive": false
+  },
+  {
+   "at": "2026-11-18T10:16:18.599Z",
+   "mode": "manual",
+   "status": "fail",
+   "fails": 1,
+   "round": 2,
+   "reused": false,
+   "stopHookActive": false
+  }
+ ],
+ "max": 3,
+ "marker": {
+  "page": "out/index.html",
+  "url": null,
+  "root": "out",
+  "kind": "software",
+  "category": "AI video assistant",
+  "primary": "Open the workspace",
+  "rounds": 3,
+  "start": "2026-11-18T07:43:29.151Z",
+  "by": "gate.mjs --start"
+ },
+ "manual": true,
+ "roundKey": "87889d570dfb41ea:a7229b75",
+ "roundFree": false,
+ "idleFree": false,
+ "blockKey": null,
+ "fp": "87889d570dfb41ea",
+ "page": "out/index.html",
+ "found": {
+  "fails": [
+   {
+    "check": "button-styles",
+    "where": "(one screen)",
+    "msg": "3 button styles on one screen: pill, fill #9fc7b8 (\"Open the workspace\"); soft, fill #edf1e8, outline #cad7c1 (\"What are the main takeaways?\", in a mock); soft, outline #cad7c1 (\"What should I do next?\", in a mock); the odd one out: \"What should I do next?\"",
+    "fix": "one primary and one secondary button: one shape, one height per size, one label size",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "button-styles"
+    ],
+    "wheres": [
+     "(one screen)"
+    ]
+   },
+   {
+    "check": "one-section",
+    "where": "section#product > div.wrap > div.product-app.app \"Your workspaceWalkthroughYour libraryFie\"",
+    "msg": "a band: a box 89% of the section wide on a ground of its own that holds the heading or the intro: the section's own ground is the band (SR-4)",
+    "fix": "put every block of <main> in a <section>, and give a band its own section instead of a ground inside one",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "one-section"
+    ],
+    "wheres": [
+     "section#product > div.wrap > div.product-app.app \"Your workspaceWalkthroughYour libraryFie\""
+    ]
+   },
+   {
+    "check": "container-edges",
+    "where": "div.hero-text.grid > div.span-3.hero__text > p.hero__kicker > span.small-star \"✳\"",
+    "msg": "1 text block starts on a left line at x 240, 160px from the container's left: text starts on the container's left, or on one split line (x 623, 732, 841) (SR-6)",
+    "fix": "start the text on the container's left, or on the one split line every split shares",
+    "widths": [
+     1440
+    ],
+    "from": "consistency",
+    "ids": [
+     "container-edges"
+    ],
+    "wheres": [
+     "div.hero-text.grid > div.span-3.hero__text > p.hero__kicker > span.small-star \"✳\""
+    ]
+   }
+  ],
+  "warns": [
+   {
+    "check": "assets",
+    "where": "(the page)",
+    "msg": "the data file index.html/__next._tree.txt?_rsc=5CB68i4pnAekjehf did not load (404)",
+    "fix": "fix the path, or remove the reference",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "text-contrast",
+    "where": "div > div.summary-takeaways > div.takeaway-line:nth-of-type(2) > p \"Keep both sets of notes so changes can b\"",
+    "msg": "4 lines of text in drawn mocks read under 4.5:1 (3 colour pairs), the worst \"Keep both sets of notes \" in #202923 on #161c1a at 1.15:1",
+    "fix": "lift the mocks' muted text (labels, meta, initials) to 4.5:1 on their own panel, or set it larger",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "hole",
+    "where": "section#context \"Search your video transcript.\"",
+    "msg": "an empty hole 1440x288px inside the section (32% of the screen's height), with content above and below it",
+    "fix": "close the empty space: move the content together, or give the space the visual it lacks",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-labels",
+    "where": "div.wrap.nav__bar > nav.nav__links > div.nav__item:nth-of-type(1) > a.nav__link \"Product\"",
+    "msg": "\"Product\" opens a section headed \"Your video, ready for questions.\"",
+    "fix": "name each nav link after the heading of the section it opens",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-labels",
+    "where": "div.wrap.nav__bar > nav.nav__links > div.nav__item:nth-of-type(2) > a.nav__link \"Capabilities\"",
+    "msg": "\"Capabilities\" opens a section headed \"Notes that turn into next steps.\"",
+    "fix": "name each nav link after the heading of the section it opens",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-labels",
+    "where": "div.wrap.nav__bar > nav.nav__links > div.nav__item:nth-of-type(3) > a.nav__link \"Workflow\"",
+    "msg": "\"Workflow\" opens a section headed \"From video to useful notes.\"",
+    "fix": "name each nav link after the heading of the section it opens",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "copy-length",
+    "where": "section#questions \"Questions, before you begin.\"",
+    "msg": "1 section over 90 words a screen outside the UI mocks (\"Questions, before you be\" 148); 64 words a screen across the page (381 words in 6 screens): a tech page says it in about 80 or fewer",
+    "fix": "cut every section to its heading, one line and the product UI: the UI says the rest; no second paragraph, no list of feature sentences",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "nav-current",
+    "where": "header.nav.nav--centre",
+    "msg": "the nav stays on screen with 4 links to the page's sections, but never marks the one you are in (no link changes as the page scrolls)",
+    "fix": "mark the link of the section on screen (a colour, a weight or a line under it) as the visitor scrolls",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "progress-bar",
+    "where": "div.panel.panel--flush > div.feature-tasks.ui > div.feature-task-foot > span.task-progress \"Action items 3 tasks Choose a scene to o\"",
+    "msg": "a progress or meter bar on the page, like the one in \"Action items 3 tasks Choose a \": the house rules have no drag or progress bars",
+    "fix": "show the figure in words or as a number (\"2 of 5 done\"), not as a bar that fills",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "visual-caption",
+    "where": "div.ly-piece.hero-video > div.video-player.video-player--compact > div.video-controls > span.video-time \"00:00 / 00:05\"",
+    "msg": "a muted 9px line of 1 row sits 15px under the video: it reads as a caption: \"00:00 / 00:05\"; no caption or description under any image, render or visual (house rule)",
+    "fix": "take the line away: no caption or description under, over or on any image, render or visual; a licence credit goes in one footer line",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "action-repeat",
+    "where": "header.nav.nav--centre > div.wrap.nav__bar > div.nav__actions > a.btn.btn--primary \"open the workspace\"",
+    "msg": "\"open the workspace\" shows 2 times on the first screen at 1440px (nav, hero): the nav's button and the hero's; nothing else on the screen may repeat it",
+    "fix": "show the action once a screen besides the nav's button: the hero's, the close's or the phone bar's, never all at once",
+    "widths": [
+     1440
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "text-contrast",
+    "where": "div > div.summary-takeaways > div.takeaway-line:nth-of-type(1) > p \"Record visible details before making an \"",
+    "msg": "9 lines of text in drawn mocks read under 4.5:1 (4 colour pairs), the worst \"Record visible details b\" in #202923 on #161c1a at 1.15:1",
+    "fix": "lift the mocks' muted text (labels, meta, initials) to 4.5:1 on their own panel, or set it larger",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "body-size",
+    "where": "div.wrap > div.hero-text.grid > div.span-3.hero__text > p.hero__lead \"Turn recordings into transcripts, summar\"",
+    "msg": "8 of 11 paragraphs of running text are set under 16px (14, 15px)",
+    "fix": "set running text at 16px or more",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "section-gaps",
+    "where": "section#questions / footer#contact",
+    "msg": "215px between these sections, +52% against the median 141px",
+    "fix": "use one gap between sections (all within 25% of each other)",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   },
+   {
+    "check": "proximity",
+    "where": "section.hero.hero--triptych > div.wrap > div.hero-text.grid > div.ly-collage.hero-collage \"Built around your video ✳ AI video notes\"",
+    "msg": "stacked at this width, the visual starts 21px under the text and buttons above it (\"Built around your video ✳ AI v\"): it reads glued to them",
+    "fix": "give the stacked split the section's own gap between text and visual (40px or more on a phone)",
+    "widths": [
+     390
+    ],
+    "from": "consistency"
+   }
+  ],
+  "crashed": [],
+  "seconds": {
+   "consistency": 135,
+   "layout": 8
+  }
+ },
+ "open": [
+  {
+   "check": "container-edges",
+   "where": "div.hero-text.grid > div.span-3.hero__text > p.hero__kicker > span.small-star \"✳\"",
+   "msg": "1 text block starts on a left line at x 240, 160px from the container's left: text starts on the container's left, or on one split line (x 623, 732, 841) (SR-6)",
+   "fix": "start the text on the container's left, or on the one split line every split shares",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "container-edges"
+   ],
+   "wheres": [
+    "div.hero-text.grid > div.span-3.hero__text > p.hero__kicker > span.small-star \"✳\""
+   ]
+  }
+ ],
+ "waived": [
+  {
+   "check": "button-styles",
+   "where": "(one screen)",
+   "msg": "3 button styles on one screen: pill, fill #9fc7b8 (\"Open the workspace\"); soft, fill #edf1e8, outline #cad7c1 (\"What are the main takeaways?\", in a mock); soft, outline #cad7c1 (\"What should I do next?\", in a mock); the odd one out: \"What should I do next?\"",
+   "fix": "one primary and one secondary button: one shape, one height per size, one label size",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "button-styles"
+   ],
+   "wheres": [
+    "(one screen)"
+   ],
+   "reason": "The live application preview contains outlined chat suggestions as application controls. Its partially scrolled suggestion uses the same CSS as the visible suggestions, not a third page action. The landing page's primary buttons all share the dealt pill style."
+  },
+  {
+   "check": "one-section",
+   "where": "section#product > div.wrap > div.product-app.app \"Your workspaceWalkthroughYour libraryFie\"",
+   "msg": "a band: a box 89% of the section wide on a ground of its own that holds the heading or the intro: the section's own ground is the band (SR-4)",
+   "fix": "put every block of <main> in a <section>, and give a band its own section instead of a ground inside one",
+   "widths": [
+    1440
+   ],
+   "from": "consistency",
+   "ids": [
+    "one-section"
+   ],
+   "wheres": [
+    "section#product > div.wrap > div.product-app.app \"Your workspaceWalkthroughYour libraryFie\""
+   ],
+   "reason": "This is the required live app frame with its own workspace heading, tabs, and chat. The marketing heading and intro are outside it in the product section. Treating the application's internal heading as a second marketing band conflates the application UI with page structure."
+  }
+ ],
+ "warnCount": 15,
+ "at": "2026-11-18T10:16:18.603Z"
+}

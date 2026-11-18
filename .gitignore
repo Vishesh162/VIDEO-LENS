@@ -1,0 +1,10 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.web_uploads/
+vector_db/
+downloads/
+downloades/
+node_modules/
+.next/

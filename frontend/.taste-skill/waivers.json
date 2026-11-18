@@ -1,0 +1,12 @@
+[
+  {
+    "check": "button-styles",
+    "target": "(one screen)",
+    "reason": "The live application preview contains outlined chat suggestions as application controls. Its partially scrolled suggestion uses the same CSS as the visible suggestions, not a third page action. The landing page's primary buttons all share the dealt pill style."
+  },
+  {
+    "check": "one-section",
+    "target": "section#product > div.wrap > div.product-app",
+    "reason": "This is the required live app frame with its own workspace heading, tabs, and chat. The marketing heading and intro are outside it in the product section. Treating the application's internal heading as a second marketing band conflates the application UI with page structure."
+  }
+]
