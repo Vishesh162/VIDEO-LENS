@@ -1,7 +1,7 @@
 import type { AnalysisJob, Language, VideoSession } from "./types";
 
-const API_BASE = (process.env.NEXT_PUBLIC_ASSISTANT_API_URL || "http://127.0.0.1:8001").replace(/\/$/u, "");
-export const MAX_UPLOAD_BYTES = 200 * 1024 * 1024;
+const API_BASE = (process.env.NEXT_PUBLIC_ASSISTANT_API_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://127.0.0.1:8001")).replace(/\/$/u, "");
+export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 export const ACCEPTED_EXTENSIONS = ["mp4", "mov", "webm", "mkv", "mp3", "wav", "m4a", "ogg"];
 
 export function validateYoutube(value: string): string | null {
@@ -27,7 +27,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     response = await fetch(`${API_BASE}${path}`, init);
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
-    throw new Error("Your assistant is offline. Open the walkthrough, or start the local assistant and try again.");
+    throw new Error("The assistant is unavailable. Please try again shortly, or explore the walkthrough.");
   }
   const body = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(typeof body.error === "string" ? body.error : "The assistant couldn’t complete that request. Please try again.");

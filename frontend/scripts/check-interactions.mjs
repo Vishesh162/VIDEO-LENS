@@ -27,6 +27,7 @@ const base = `http://127.0.0.1:${server.address().port}`;
 const browser = spawn(chrome, ['--headless=new', '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--remote-debugging-port=0', `--user-data-dir=${profile}`, 'about:blank'], { windowsHide:true, stdio:'ignore' });
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 let socket;
+let downloads;
 const pending = new Map();
 let nextId = 0;
 let checks = 0;
@@ -47,7 +48,7 @@ try {
   await new Promise((resolve,reject)=>{socket.addEventListener('open',resolve,{once:true});socket.addEventListener('error',reject,{once:true});});
   socket.addEventListener('message',(event)=>{const message=JSON.parse(event.data);const request=pending.get(message.id);if(request){pending.delete(message.id);message.error?request.reject(new Error(message.error.message)):request.resolve(message.result);}});
   await send('Page.enable'); await send('Runtime.enable');
-  const downloads = path.resolve('.taste-skill', 'interaction-downloads');
+  downloads = fs.mkdtempSync(path.resolve('.taste-skill', 'interaction-downloads-'));
   fs.mkdirSync(downloads, { recursive:true });
   await send('Browser.setDownloadBehavior', { behavior:'allow', downloadPath:downloads });
   await send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
@@ -63,10 +64,24 @@ try {
   await check('task completion',async()=>{await evaluate('[...document.querySelectorAll(".notes-tab")].find(button=>button.textContent==="Actions").click()');await sleep(250);await evaluate('document.querySelector(".action-item input").click()');assert(await evaluate('document.querySelector(".action-item").classList.contains("is-complete")'));});
   await check('grounded walkthrough chat',async()=>{await evaluate('document.querySelector(".chat-suggestions button").click()');await waitFor('document.querySelector(".chat-message--assistant") !== null','Assistant did not answer');assert(await evaluate('document.querySelector(".chat-message--assistant").textContent.includes("observe before interpreting")'));assert(await evaluate('document.querySelector(".chat-message-footer").textContent.includes("00:00")'));});
   await check('video playback',async()=>{await evaluate('document.querySelector(".video-play-disc").click()');await sleep(1000);assert(await evaluate('document.querySelector("video").currentTime > 0'));await evaluate('document.querySelector("video").pause()');});
-  await check('notes download',async()=>{await evaluate('[...document.querySelectorAll(".session-toolbar-actions button")].find(button=>button.getAttribute("aria-label")==="Download notes").click()');await waitFor('document.querySelector(".studio-toast")?.textContent.includes("Notes downloaded")','Download did not run');});
+  await check('notes download creates a PDF',async()=>{
+    await evaluate('[...document.querySelectorAll(".session-toolbar-actions button")].find(button=>button.getAttribute("aria-label")==="Download notes as PDF").click()');
+    await waitFor('document.querySelector(".studio-toast")?.textContent.includes("PDF downloaded")','PDF download did not run');
+    for(let i=0;i<30&&!fs.readdirSync(downloads).some(file=>file.endsWith('.pdf'));i++) await sleep(100);
+    const file=fs.readdirSync(downloads).find(name=>name.endsWith('.pdf'));
+    assert(file,'PDF file was not downloaded');
+    assert.equal(fs.readFileSync(path.join(downloads,file)).subarray(0,5).toString(),'%PDF-');
+  });
   await send('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
   await navigate('/workspace/?walkthrough=1');
   await check('mobile notes and chat switch',async()=>{assert(await evaluate('document.documentElement.scrollWidth <= innerWidth'));await evaluate('document.querySelectorAll(".session-mobile-tabs button")[1].click()');assert(await evaluate('getComputedStyle(document.querySelector(".session-columns > .assistant-chat")).display !== "none"'));await evaluate('document.querySelectorAll(".session-mobile-tabs button")[0].click()');assert(await evaluate('getComputedStyle(document.querySelector(".session-document")).display !== "none"'));});
+  await check('no video library, legacy browser notes are cleared', async () => {
+    const key = 'ai-video-assistant:library:v1';
+    await evaluate(`localStorage.setItem(${JSON.stringify(key)}, '[{"title":"old saved notes"}]')`);
+    await navigate('/workspace/');
+    assert.equal(await evaluate(`localStorage.getItem(${JSON.stringify(key)})`), null);
+    assert.equal(await evaluate('document.querySelectorAll(".studio-sidebar, .library-item, .mobile-library-toggle").length'), 0);
+  });
   await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
   await navigate('/');
   await check('mobile layout and reduced motion',async()=>{assert(await evaluate('document.documentElement.scrollWidth <= innerWidth'));assert(await evaluate('getComputedStyle(document.querySelector("h1")).opacity !== "0"'));assert(await evaluate('document.querySelector(".hero__cta .btn").getBoundingClientRect().bottom <= innerHeight'));});
@@ -78,4 +93,6 @@ try {
   socket?.close(); browser.kill(); await new Promise((resolve)=>server.close(resolve));
   const resolved=path.resolve(profile);
   if(resolved.startsWith(profiles+path.sep)) {for(let i=0;i<10;i++){try{fs.rmSync(resolved,{recursive:true,force:true});break;}catch{await sleep(200);}}}
+  const resolvedDownloads=path.resolve(downloads || profiles);
+  if(resolvedDownloads.startsWith(profiles+path.sep)) {for(let i=0;i<10;i++){try{fs.rmSync(resolvedDownloads,{recursive:true,force:true});break;}catch{await sleep(200);}}}
 }

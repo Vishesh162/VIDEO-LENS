@@ -1,5 +1,7 @@
 import os
 import glob
+import subprocess
+from pathlib import Path
 import yt_dlp
 
 # Make deno + ffmpeg visible even if VS Code has a stale PATH
@@ -7,9 +9,6 @@ _winget = os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\WinGet")
 extra = glob.glob(_winget + r"\Packages\Gyan.FFmpeg*\**\bin", recursive=True)
 extra += [_winget + r"\Links"]
 os.environ["PATH"] = os.pathsep.join(extra + [os.environ["PATH"]])
-
-from pydub import AudioSegment  # import after PATH fix
-
 
 def download_youtube_audio(url, out_dir="downloads"):
     os.makedirs(out_dir, exist_ok=True)
@@ -29,28 +28,30 @@ def download_youtube_audio(url, out_dir="downloads"):
 
 
 def convert_to_wav(input_path: str) -> str:
-    """Convert any audio/video file to WAV format using pydub."""
+    """Decode on disk instead of holding the complete recording in memory."""
     output_path = os.path.splitext(input_path)[0] + "_converted.wav"
-    audio = AudioSegment.from_file(input_path)
-    audio = audio.set_channels(1).set_frame_rate(16000) #for mono audio and 16khz
-    audio.export(output_path, format="wav")
+    subprocess.run(
+        ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
+         "-i", input_path, "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le", output_path],
+        check=True, capture_output=True, timeout=600,
+    )
     return output_path 
 
 
 def chunk_audio(wav_path:str,chunk_minutes:int=10)->list:
-    audio=AudioSegment.from_wav(wav_path)
-    chunk_ms=chunk_minutes*60*1000
-
-    chunks=[]
-
-    for i, start in enumerate(range(0,len(audio),chunk_ms)):
-
-        chunk= audio[start:start+chunk_ms]
-        chunk_path=f"{wav_path}_chunk_{i}.wav"
-        chunk.export(chunk_path,format="wav")
-
-        chunks.append(chunk_path)
-
+    # Ten minutes of mono 16 kHz PCM is ~19.2 MB, below Groq's 25 MB limit.
+    if not 1 <= chunk_minutes <= 10:
+        raise ValueError("Choose chunk_minutes between 1 and 10.")
+    pattern = f"{wav_path}_chunk_%04d.wav"
+    subprocess.run(
+        ["ffmpeg", "-nostdin", "-hide_banner", "-loglevel", "error", "-y",
+         "-i", wav_path, "-vn", "-ac", "1", "-ar", "16000", "-c:a", "pcm_s16le",
+         "-f", "segment", "-segment_time", str(chunk_minutes * 60), "-reset_timestamps", "1", pattern],
+        check=True, capture_output=True, timeout=600,
+    )
+    chunks = sorted(str(path) for path in Path(wav_path).parent.glob(Path(wav_path).name + "_chunk_*.wav"))
+    if not chunks:
+        raise ValueError("No audio was found in this recording.")
     return chunks
 
 

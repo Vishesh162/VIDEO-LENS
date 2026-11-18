@@ -81,6 +81,7 @@ class AdapterTests(unittest.TestCase):
                 self.assertEqual(code, 202)
                 result = self.wait_job(job["id"])
                 self.assertEqual(result["status"], "complete")
+                self.assertNotIn("_finished_at", result)
                 self.assertNotIn("rag_chain", result["result"])
                 ids.append(job["id"])
             self.assertNotEqual(ids[0], ids[1])
@@ -120,6 +121,33 @@ class AdapterTests(unittest.TestCase):
         with api_server.state_lock:
             api_server.jobs[missing] = {"id": missing, "status": "queued", "stage": "Waiting"}
         self.assertEqual(self.request(f"/api/jobs/{missing}", method="DELETE")[1]["status"], "cancelled")
+
+    def test_completed_sessions_expire_and_are_removed_from_public_status(self):
+        job_id = uuid.uuid4().hex
+        with api_server.state_lock:
+            api_server.jobs[job_id] = {
+                "id": job_id,
+                "status": "complete",
+                "stage": "Done",
+                "result": {"id": job_id},
+                "_finished_at": time.monotonic() - 2,
+            }
+            api_server.sessions[job_id] = {"record": {"id": job_id}, "rag_chain": object()}
+        with patch.object(api_server, "SESSION_TTL_SECONDS", 1):
+            self.assertEqual(self.request(f"/api/jobs/{job_id}")[0], 404)
+            self.assertNotIn(job_id, api_server.sessions)
+
+    def test_completed_job_response_never_exposes_private_cleanup_state(self):
+        job_id = uuid.uuid4().hex
+        with api_server.state_lock:
+            api_server.jobs[job_id] = {
+                "id": job_id,
+                "status": "complete",
+                "stage": "Done",
+                "_finished_at": time.monotonic(),
+            }
+        _, body, _ = self.request(f"/api/jobs/{job_id}")
+        self.assertNotIn("_finished_at", body)
 
     def test_importing_audio_does_not_download_a_video(self):
         downloader = types.ModuleType("yt_dlp")

@@ -19,6 +19,7 @@ class OutputLanguageTests(unittest.TestCase):
             "langchain_mistralai": ("ChatMistralAI",),
             "langchain_text_splitters": ("RecursiveCharacterTextSplitter",),
             "core.vector_stores": ("build_vector_store", "load_vector_store", "get_retriever"),
+            "core.transcript_search": ("build_retriever",),
         }.items():
             module = types.ModuleType(dependency)
             for attribute in attributes:
@@ -72,8 +73,7 @@ class OutputLanguageTests(unittest.TestCase):
         retriever = RunnableLambda(lambda question: [])
         with (
             patch.object(module, "get_llm", return_value=self.llm),
-            patch.object(module, "build_vector_store", return_value=object()),
-            patch.object(module, "get_retriever", return_value=retriever),
+            patch.object(module, "build_retriever", return_value=retriever),
         ):
             chain = module.build_rag_chain("Ringkasan rapat.")
             self.assertEqual(chain.invoke("What are the takeaways?"), "Fixture response.")

@@ -7,11 +7,11 @@ import { ProductPreview } from "@/components/product-preview";
 import { Check, FileVideo, Headphones, MessageSquare, ShieldCheck, Sparkles, Upload, Youtube } from "lucide-react";
 
 const questions = [
-  ["What video can I upload?", "Bring an MP4, MOV, WebM, or MKV video, or an MP3, WAV, M4A, or OGG recording. Files can be up to 200 MB."],
+  ["What video can I upload?", "Bring an MP4, MOV, WebM, or MKV video, or an MP3, WAV, M4A, or OGG recording. Files can be up to 50 MB."],
   ["Can I use a YouTube link?", "Yes. Paste a link to a public YouTube video. The assistant works with the audio to prepare your transcript and notes."],
   ["Does it understand Hinglish?", "Choose English or Hinglish before you start. Hinglish recordings are translated into English for the transcript and notes."],
   ["Where do video answers come from?", "The assistant uses the video’s transcript. If the recording doesn’t contain the information, it tells you instead of filling in the gaps."],
-  ["Can I keep my video notes?", "Your library stays in this browser. Download notes as Markdown or copy the transcript to keep a separate record."],
+  ["Can I keep my video notes?", "No account is needed. Notes stay in the current tab. Download a PDF or copy the transcript before leaving the page."],
 ];
 
 export default function Home() {

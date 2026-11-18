@@ -39,7 +39,7 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - English transcription now explicitly passes language="en" and fp16=False. Removed the duplicate Whisper wrapper so only one definition remains; Hinglish still routes to Sarvam.
 - Added three model-free regression tests for English language selection, FP16 safety, Hinglish routing, and per-chunk behavior. Combined API and transcription tests: 9 passed.
 - Actual recording output remains unverified without a fresh analysis. Existing saved notes will not change automatically. The API was subsequently restarted with user approval; see the restart verification below.
-- The earlier PDF export request remains pending approval to install jsPDF; no PDF changes or package installations have been made.
+- The earlier PDF export request has now been implemented with jsPDF; see PDF notes downloads below.
 
 ## Notes output language follow-up
 
@@ -56,3 +56,19 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - Headless Chrome confirmed browser-to-API health and JSON POST connectivity through the actual frontend client after restart. The frontend server was left running.
 - Current API launcher PID: 25948; listener PID: 20240. Timestamped logs and updated process metadata are in ignored .web_uploads/.
 - Old in-memory chat sessions ended as expected. Browser-saved notes were not changed.
+
+## PDF notes downloads
+
+- Replaced Markdown downloads with actual PDF generation in the workspace and landing-page walkthrough. Existing saved videos use the same PDF export without another analysis.
+- Added jsPDF with user authorization. PDFs include summary, action items, decisions, open questions, and transcript, with embedded local Onest fonts, line wrapping, automatic page breaks, and page numbers.
+- Updated the download button, FAQ, privacy copy, and frontend documentation.
+- Verified production build and headless Chrome download of a file with a real PDF header.
+
+## Public deployment preparation
+
+- English transcription now defaults to the server-side Groq Whisper API; local Whisper remains an opt-in fallback. Hinglish remains on Sarvam. DeepSeek integration is unchanged.
+- Removed the browser video-library UI, clear its old saved history on workspace entry, and keep new notes in the active page only. Users can download PDFs before leaving.
+- Added memory-only transcript search, FFmpeg disk-based conversion and chunking, 50 MB uploads, one active analysis at a time, and one-hour session expiry.
+- Added a Render free Docker service blueprint. One container serves the static frontend and Python API through Nginx; production API requests use same-origin routes. Provider keys remain server-side.
+- Python tests: 23 passed plus 5 subtests. Browser checks: 15/15 passed. Production build passed. Docker image build and running-container checks passed for the homepage, workspace, and API health.
+- No live Groq request was sent. The credential posted in chat needs to be rotated before it is used for live transcription.

@@ -23,13 +23,13 @@ The adapter uses the project’s existing dependencies, FFmpeg, Whisper, and con
 
 ## Included interactions
 
-- File picker and drag-and-drop, supported-format and 200 MB validation.
+- File picker and drag-and-drop, supported-format and 50 MB validation.
 - YouTube link validation; English and Hinglish selection.
 - Actual job stages, cancellation, and errors that preserve the input.
 - Summary, searchable transcript, action items, decisions, and open questions.
 - Keyboard-accessible notes tabs and mobile view selection.
 - Transcript-based chat; prepared local answers in the walkthrough.
-- Markdown downloads, transcript copy, and an eight-item browser library.
+- PDF downloads and transcript copy. Notes stay in the current page only; download the PDF before leaving.
 - Video playback, scrubbing, audio control, and fullscreen.
 - Responsive workspace with a mobile notes/chat switch.
 - Reduced-motion support throughout.
@@ -50,4 +50,4 @@ Next.js exports the frontend to `out/`. The interaction check launches headless 
 
 The CC0 flower footage comes from MDN Web Docs. The poster was extracted from that footage. The walkthrough’s lesson, transcript, notes, and answers are authored fixtures for trying the interface; they are not a claimed live transcription of the flower clip. Onest and JetBrains Mono are locally hosted Google Fonts. No customer names, prices, testimonials, or usage figures were invented.
 
-The canonical domain and a production hosting/API configuration are still yours to set. This local build deliberately exposes no provider keys to the browser. The browser library stores completed notes, not the original video bytes. Reloading a saved uploaded session preserves notes; replay requires reselecting the source recording. Live chat sessions end when the Python server restarts.
+The Render Docker service runs the static frontend and Python API together. GROQ_API_KEY and ROUTIX_API_KEY are server-side secrets. Visitors do not need a GPU. Uploads are temporary, and notes are held only for the current page; download a PDF before leaving. Render's free service sleeps while idle, so the first request may be delayed.

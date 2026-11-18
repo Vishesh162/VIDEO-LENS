@@ -1,0 +1,8 @@
+# Lightweight deployment: hosted Whisper + existing DeepSeek, no GPU dependencies.
+requests==2.34.2
+python-dotenv==1.2.4
+yt-dlp==2026.10.26
+pydub==0.25.1
+langchain-core==1.8.0
+langchain-openai==1.8.0
+langchain-text-splitters>=1.0,<2

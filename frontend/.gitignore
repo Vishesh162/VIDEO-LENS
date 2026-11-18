@@ -7,3 +7,5 @@ out/
 !.env.example
 .taste-skill/chrome*/
 .taste-skill/shots/
+
+.taste-skill/interaction-downloads*/

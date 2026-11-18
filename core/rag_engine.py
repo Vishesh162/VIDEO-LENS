@@ -1,19 +1,21 @@
 import os
-from langchain_mistralai import ChatMistralAI
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-from core.vector_stores import build_vector_store, load_vector_store, get_retriever
 from core.llm import get_llm
+from core.transcript_search import build_retriever
 
 def format_docs(docs):
     return "\n\n".join([doc.page_content for doc in docs])
 
 def build_rag_chain(transcript:str, *, collection_name: str | None = None):
 
-    vector_store = build_vector_store(transcript, collection_name=collection_name)
-
-    retriever = get_retriever(vector_store, k = 4)
+    if os.getenv("RAG_BACKEND", "memory") == "vector":
+        from core.vector_stores import build_vector_store, get_retriever
+        vector_store = build_vector_store(transcript, collection_name=collection_name)
+        retriever = get_retriever(vector_store, k=4)
+    else:
+        retriever = build_retriever(transcript, k=4)
 
     llm = get_llm()
 
@@ -51,8 +53,9 @@ Context from meeting transcript:
 
 
 def load_rag_chain():
+    from core.vector_stores import load_vector_store, get_retriever
     vector_store = load_vector_store()
-    retriver = get_retriever()
+    retriver = get_retriever(vector_store)
 
     llm = get_llm()
     prompt = ChatPromptTemplate.from_messages([
