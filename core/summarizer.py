@@ -20,7 +20,7 @@ def summarize(transcript:str)->str:
 
     map_prompt= ChatPromptTemplate.from_messages(
          [
-        ("system", "Summarize this portion of a meeting transcript concisely."),
+        ("system", "Summarize this portion of a meeting transcript concisely in English, regardless of the transcript language."),
         ("human", "{text}"),
     ]
     )
@@ -38,7 +38,7 @@ def summarize(transcript:str)->str:
         (
             "system",
             "You are an expert meeting summarizer. Combine these partial summaries "
-            "into one final professional meeting summary in bullet points.",
+            "into one final professional meeting summary in English using bullet points, regardless of the source language.",
         ),
         ("human", "{text}"),
     ]
@@ -62,7 +62,7 @@ def generate_title(transcipt : str) -> str:
              (
                 "system",
                 "Based on the meeting transcript, generate a short professional meeting title "
-                "(max 8 words). Only return the title, nothing else.",
+                "(max 8 words). Write the title in English, regardless of the transcript language. Only return the title, nothing else.",
             ),
             ("human", "{text}"),
         ])

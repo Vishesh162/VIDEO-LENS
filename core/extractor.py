@@ -22,7 +22,7 @@ def build_chain(system_prompt : str):
     llm = get_llm()
     return (
         RunnablePassthrough() | RunnableLambda(lambda x : {"text" : x}) |ChatPromptTemplate.from_messages([
-        ("system", system_prompt),
+        ("system", system_prompt + "\nWrite all output in English, regardless of the transcript language."),
         ("human","{text}"),
     ]) | llm |StrOutputParser()
     )

@@ -40,3 +40,11 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - Added three model-free regression tests for English language selection, FP16 safety, Hinglish routing, and per-chunk behavior. Combined API and transcription tests: 9 passed.
 - Actual recording output remains unverified without the source audio. Existing saved notes will not change automatically; they need a new analysis. The running API needs a restart to guarantee the code change is loaded; restart approval is pending because in-memory chat sessions would end.
 - The earlier PDF export request remains pending approval to install jsPDF; no PDF changes or package installations have been made.
+
+## Notes output language follow-up
+
+- The reported Google Trends job completed with language="english", but its logged raw transcript is Indonesian-looking. The API process predates the Whisper language fix and has not been restarted.
+- Summary (both passes), title, action items, decisions, and questions now explicitly request English output. Chat defaults to English while allowing an explicit request for another language.
+- Added model-free prompt composition regression tests. `python -m pytest tests`: 13 passed. These checks verify request construction, not a real provider's output.
+- Checked the affected video's metadata without downloading media; it advertises an original English audio track. No automatic dubbing change was made.
+- Restarting the API and rerunning the affected recording are still required to validate the live correction. Existing saved notes have not been edited or removed.
