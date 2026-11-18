@@ -19,7 +19,7 @@ def main():
 
 
     source = args.source
-    language = "english"   # "english" → Whisper, "hinglish" → Sarvam
+    language = args.language
 
 
 
