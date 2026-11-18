@@ -32,3 +32,11 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - requirements.txt does not explicitly list langchain-openai, langchain-chroma, or langchain-text-splitters, although all three are installed in the current .venv. A fresh-environment installation has not been verified.
 - Real English/Hinglish transcription, provider credentials, model downloads, and a complete live video-to-chat run remain unverified; API tests use fixtures and connectivity checks make no model calls.
 - API chat sessions are held in memory and end on server restart. Production deployment configuration and persistent session recovery remain future work.
+
+## Transcription language correction
+
+- Investigated a user-reported Indonesian-looking transcript. English selection was not forwarded to Whisper, leaving language detection automatic; the installed Whisper source confirms this behavior when language is omitted.
+- English transcription now explicitly passes language="en" and fp16=False. Removed the duplicate Whisper wrapper so only one definition remains; Hinglish still routes to Sarvam.
+- Added three model-free regression tests for English language selection, FP16 safety, Hinglish routing, and per-chunk behavior. Combined API and transcription tests: 9 passed.
+- Actual recording output remains unverified without the source audio. Existing saved notes will not change automatically; they need a new analysis. The running API needs a restart to guarantee the code change is loaded; restart approval is pending because in-memory chat sessions would end.
+- The earlier PDF export request remains pending approval to install jsPDF; no PDF changes or package installations have been made.
