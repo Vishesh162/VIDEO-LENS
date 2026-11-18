@@ -64,11 +64,13 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - Updated the download button, FAQ, privacy copy, and frontend documentation.
 - Verified production build and headless Chrome download of a file with a real PDF header.
 
-## Public deployment preparation
+## Public deployment and hosted Whisper
 
 - English transcription now defaults to the server-side Groq Whisper API; local Whisper remains an opt-in fallback. Hinglish remains on Sarvam. DeepSeek integration is unchanged.
 - Removed the browser video-library UI, clear its old saved history on workspace entry, and keep new notes in the active page only. Users can download PDFs before leaving.
 - Added memory-only transcript search, FFmpeg disk-based conversion and chunking, 50 MB uploads, one active analysis at a time, and one-hour session expiry.
 - Added a Render free Docker service blueprint. One container serves the static frontend and Python API through Nginx; production API requests use same-origin routes. Provider keys remain server-side.
 - Python tests: 23 passed plus 5 subtests. Browser checks: 15/15 passed. Production build passed. Docker image build and running-container checks passed for the homepage, workspace, and API health.
-- No live Groq request was sent. The credential posted in chat needs to be rotated before it is used for live transcription.
+- A real Groq transcription + DeepSeek notes and grounded-chat test passed using generated speech.
+- Investigated the first Render YouTube failure: logs showed YouTube 429/403 responses and yt-dlp lacked a JavaScript challenge runtime. Added Node 24, the yt-dlp EJS dependency group, and explicit Node runtime configuration. The updated container successfully downloaded audio from the exact YouTube URL shown in the Render logs; full notes/chat already passed separately.
+- yt-dlp’s cloud-access failures now return a clear message with video/audio upload as the fallback. Render auto-deploys this fix when it is pushed to main.

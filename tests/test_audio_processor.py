@@ -1,12 +1,36 @@
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
-from utils.audio_processor import chunk_audio, convert_to_wav
+from utils.audio_processor import AudioProcessingError, chunk_audio, convert_to_wav, download_youtube_audio
 
 
 class AudioProcessorTests(unittest.TestCase):
+    def test_youtube_download_enables_node_and_the_default_extractor_retries(self):
+        youtube = MagicMock()
+        youtube.return_value.__enter__.return_value.extract_info.return_value = {"id": "abcdefghijk"}
+        with tempfile.TemporaryDirectory() as folder, patch("utils.audio_processor.yt_dlp.YoutubeDL", youtube):
+            result = download_youtube_audio("https://www.youtube.com/watch?v=abcdefghijk", folder)
+
+        self.assertEqual(result, str(Path(folder) / "abcdefghijk.wav"))
+        configured = youtube.call_args.args[0]
+        self.assertEqual(configured["js_runtimes"], {"node": {}})
+        self.assertEqual(configured["retries"], 2)
+        self.assertEqual(configured["extractor_retries"], 2)
+
+    def test_youtube_rate_limit_has_an_actionable_upload_fallback(self):
+        with (
+            patch(
+                "utils.audio_processor.yt_dlp.YoutubeDL",
+                side_effect=__import__("yt_dlp").utils.DownloadError("HTTP Error 429: Too Many Requests"),
+            ),
+            self.assertRaisesRegex(AudioProcessingError, "blocked.*uploading") as caught,
+        ):
+            download_youtube_audio("https://www.youtube.com/watch?v=abcdefghijk", "downloads")
+
+        self.assertNotIn("429", str(caught.exception))
+
     def test_convert_uses_ffmpeg_to_make_mono_16khz_audio(self):
         with tempfile.TemporaryDirectory() as folder:
             source = str(Path(folder) / "meeting.mp4")

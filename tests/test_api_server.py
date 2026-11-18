@@ -149,6 +149,24 @@ class AdapterTests(unittest.TestCase):
         _, body, _ = self.request(f"/api/jobs/{job_id}")
         self.assertNotIn("_finished_at", body)
 
+    def test_public_youtube_download_failure_suggests_uploading_the_recording(self):
+        module = types.ModuleType("main")
+        module.run_pipeline = MagicMock(
+            side_effect=api_server.AudioProcessingError(
+                "YouTube blocked the download from this cloud server. Try uploading the video or audio file instead."
+            )
+        )
+        with patch.dict(sys.modules, {"main": module}):
+            _, job, _ = self.request(
+                "/api/analyze",
+                json.dumps({"source": "https://youtu.be/abcdefghijk", "language": "english"}).encode(),
+                headers={"Content-Type": "application/json"},
+            )
+            result = self.wait_job(job["id"])
+        self.assertEqual(result["status"], "failed")
+        self.assertIn("uploading", result["error"])
+        self.assertNotIn("429", result["error"])
+
     def test_importing_audio_does_not_download_a_video(self):
         downloader = types.ModuleType("yt_dlp")
         downloader.YoutubeDL = MagicMock(side_effect=AssertionError("Unexpected download on import"))

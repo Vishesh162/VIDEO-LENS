@@ -18,6 +18,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 from core.transcriber import TranscriptionError
+from utils.audio_processor import AudioProcessingError
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 UPLOAD_ROOT = PROJECT_ROOT / ".web_uploads"
@@ -112,7 +113,7 @@ def analyze_job(job_id: str, source: str, language: str, kind: str, name: str, f
         logger.exception("Analysis failed for job %s", job_id)
         with state_lock:
             if jobs[job_id]["status"] != "cancelled":
-                message = str(error) if isinstance(error, TranscriptionError) else "This recording couldn’t be processed. Please try again or contact the server owner."
+                message = str(error) if isinstance(error, (TranscriptionError, AudioProcessingError)) else "This recording couldn’t be processed. Please try again or contact the server owner."
                 jobs[job_id].update(status="failed", stage="Unable to complete analysis", error=message)
     finally:
         with state_lock:

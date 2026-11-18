@@ -15,6 +15,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg nginx \
 WORKDIR /app
 COPY requirements-web.txt ./
 RUN pip install --no-cache-dir -r requirements-web.txt
+COPY --from=frontend /usr/local/bin/node /usr/local/bin/node
 COPY core/ ./core/
 COPY utils/ ./utils/
 COPY main.py api_server.py ./
