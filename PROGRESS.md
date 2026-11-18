@@ -38,13 +38,21 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - Investigated a user-reported Indonesian-looking transcript. English selection was not forwarded to Whisper, leaving language detection automatic; the installed Whisper source confirms this behavior when language is omitted.
 - English transcription now explicitly passes language="en" and fp16=False. Removed the duplicate Whisper wrapper so only one definition remains; Hinglish still routes to Sarvam.
 - Added three model-free regression tests for English language selection, FP16 safety, Hinglish routing, and per-chunk behavior. Combined API and transcription tests: 9 passed.
-- Actual recording output remains unverified without the source audio. Existing saved notes will not change automatically; they need a new analysis. The running API needs a restart to guarantee the code change is loaded; restart approval is pending because in-memory chat sessions would end.
+- Actual recording output remains unverified without a fresh analysis. Existing saved notes will not change automatically. The API was subsequently restarted with user approval; see the restart verification below.
 - The earlier PDF export request remains pending approval to install jsPDF; no PDF changes or package installations have been made.
 
 ## Notes output language follow-up
 
-- The reported Google Trends job completed with language="english", but its logged raw transcript is Indonesian-looking. The API process predates the Whisper language fix and has not been restarted.
+- The reported Google Trends job completed with language="english", but its logged raw transcript is Indonesian-looking. At diagnosis time, the API process predated the Whisper language fix.
 - Summary (both passes), title, action items, decisions, and questions now explicitly request English output. Chat defaults to English while allowing an explicit request for another language.
 - Added model-free prompt composition regression tests. `python -m pytest tests`: 13 passed. These checks verify request construction, not a real provider's output.
 - Checked the affected video's metadata without downloading media; it advertises an original English audio track. No automatic dubbing change was made.
-- Restarting the API and rerunning the affected recording are still required to validate the live correction. Existing saved notes have not been edited or removed.
+- The affected recording still needs a fresh analysis to validate the live correction. Existing saved notes have not been edited or removed.
+
+## API restart verification
+
+- Restarted only the project Python API on 2026-11-18 at 18:57 local time, with explicit user approval, so subsequent analysis requests use the latest transcription and output-language code.
+- API health at http://127.0.0.1:8001/api/health returned 200 with status ready. The workspace at http://127.0.0.1:3000/workspace/ returned 200.
+- Headless Chrome confirmed browser-to-API health and JSON POST connectivity through the actual frontend client after restart. The frontend server was left running.
+- Current API launcher PID: 25948; listener PID: 20240. Timestamped logs and updated process metadata are in ignored .web_uploads/.
+- Old in-memory chat sessions ended as expected. Browser-saved notes were not changed.
