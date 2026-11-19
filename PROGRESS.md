@@ -74,3 +74,11 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - A real Groq transcription + DeepSeek notes and grounded-chat test passed using generated speech.
 - Investigated the first Render YouTube failure: logs showed YouTube 429/403 responses and yt-dlp lacked a JavaScript challenge runtime. Added Node 24, the yt-dlp EJS dependency group, and explicit Node runtime configuration. The updated container successfully downloaded audio from the exact YouTube URL shown in the Render logs; full notes/chat already passed separately.
 - yt-dlp’s cloud-access failures now return a clear message with video/audio upload as the fallback. Render auto-deploys this fix when it is pushed to main.
+
+## 150 MB recording uploads
+
+- Raised frontend, API, and reverse-proxy recording limits to 150 MiB (shown as 150 MB). Multipart uploads now stream to disk in 64 KiB reads instead of buffering the entire file. Added bounded metadata, incomplete-upload cleanup, explicit size errors, and a lock covering upload admission.
+- Added the already-installed python-multipart parser to local and deployment requirements. Nginx request buffering is disabled for the API; provider keys and the DeepSeek model configuration are unchanged.
+- Full-size generated 150 MiB upload parser test passed with under 4 MiB measured Python peak allocation. Regressions: 34 tests and 7 subtests passed; browser checks 15/15 passed; frontend and Docker builds passed.
+- Real 150 MiB multipart request through the Docker/Nginx API passed under a 512 MiB container memory cap, followed by FFmpeg decoding, Groq Whisper, DeepSeek notes, and chat. The file contained short generated speech with valid media-container padding: this validates file-size handling, not long-duration performance. Container memory after analysis was 154 MiB.
+- Whisper still receives sequential mono 16 kHz audio chunks below its 25 MiB upload limit. Long recordings still take longer and remain subject to provider rate limits.

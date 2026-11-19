@@ -12,21 +12,21 @@ import uuid
 import time
 from concurrent.futures import CancelledError, ThreadPoolExecutor
 from datetime import datetime, timezone
-from email import policy
-from email.parser import BytesParser
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 from core.transcriber import TranscriptionError
 from utils.audio_processor import AudioProcessingError
+from utils.upload_stream import UploadError, receive_recording
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 UPLOAD_ROOT = PROJECT_ROOT / ".web_uploads"
-MAX_FILE_BYTES = 50 * 1024 * 1024
+MAX_FILE_BYTES = 150 * 1024 * 1024
 EXTENSIONS = {".mp4", ".mov", ".webm", ".mkv", ".mp3", ".wav", ".m4a", ".ogg"}
 jobs: dict[str, dict] = {}
 sessions: dict[str, dict] = {}
 state_lock = threading.RLock()
+upload_lock = threading.Lock()
 executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="video-analysis")
 logger = logging.getLogger("video-assistant")
 SESSION_TTL_SECONDS = int(os.getenv("SESSION_TTL_SECONDS", "3600"))
@@ -158,7 +158,7 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError as error:
             raise ValueError("The request has an invalid size.") from error
         if length <= 0 or length > limit:
-            raise ValueError("Choose a recording smaller than 50 MB.")
+            raise ValueError("The request is too large or empty.")
         body = self.rfile.read(length)
         if len(body) != length:
             raise ValueError("The upload was interrupted. Please try again.")
@@ -229,6 +229,12 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, {"answer": ask_question(session["rag_chain"], question.strip())})
             else:
                 self.reply(404, {"error": "This endpoint could not be found."})
+        except UploadError as error:
+            self.close_connection = True
+            self.reply(error.status, {"error": str(error)})
+        except TimeoutError:
+            self.close_connection = True
+            self.reply(408, {"error": "The upload stopped sending data. Please try again."})
         except (ValueError, TypeError, json.JSONDecodeError):
             self.reply(400, {"error": "Check the recording, YouTube link, language, or question and try again."})
         except Exception:
@@ -236,9 +242,20 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(500, {"error": "The assistant couldn’t complete this request. Please try again."})
 
     def create_analysis(self) -> None:
+        if not upload_lock.acquire(blocking=False):
+            self.close_connection = True
+            self.reply(429, {"error": "Another recording is uploading. Please try again shortly."})
+            return
+        try:
+            self.create_analysis_reserved()
+        finally:
+            upload_lock.release()
+
+    def create_analysis_reserved(self) -> None:
         with state_lock:
             max_active = int(os.getenv("MAX_ACTIVE_JOBS", "1"))
             if sum(job["status"] in {"queued", "processing"} for job in jobs.values()) >= max_active:
+                self.close_connection = True
                 self.reply(429, {"error": "The assistant is working through the current recordings. Please try again shortly."})
                 return
         job_id = uuid.uuid4().hex
@@ -253,32 +270,25 @@ class Handler(BaseHTTPRequestHandler):
             language = data.get("language", "english")
             name = "YouTube recording"
         elif content_type.startswith("multipart/form-data"):
-            raw = self.read_body(MAX_FILE_BYTES + 1024 * 1024)
-            message = BytesParser(policy=policy.default).parsebytes(f"Content-Type: {content_type}\r\nMIME-Version: 1.0\r\n\r\n".encode() + raw)
-            if not message.is_multipart():
-                raise ValueError("Upload a video or audio recording.")
-            language = "english"
-            upload = None
-            name = "Recording"
-            for part in message.iter_parts():
-                field = part.get_param("name", header="content-disposition")
-                if field == "language":
-                    language = part.get_content().strip()
-                elif field == "file":
-                    name = Path((part.get_filename() or "recording").replace("\\", "/")).name
-                    upload = part.get_payload(decode=True)
-            suffix = Path(name).suffix.lower()
-            if suffix not in EXTENSIONS or not upload or len(upload) > MAX_FILE_BYTES:
-                raise ValueError("Choose a supported recording smaller than 50 MB.")
+            try:
+                length = int(self.headers.get("Content-Length", "0"))
+            except ValueError as error:
+                raise UploadError("The upload has an invalid size.") from error
+            self.connection.settimeout(120)
+            try:
+                source, name, language = receive_recording(
+                    self.rfile, content_type, length, folder, MAX_FILE_BYTES, EXTENSIONS,
+                )
+            except Exception:
+                cleanup_upload(folder)
+                raise
             kind = "file"
-            source = str(folder / f"recording{suffix}")
         else:
             raise ValueError("Send a recording or a YouTube video link.")
         if language not in {"english", "hinglish"}:
+            cleanup_upload(folder)
             raise ValueError("Choose English or Hinglish.")
         folder.mkdir(parents=True, exist_ok=True)
-        if kind == "file":
-            Path(source).write_bytes(upload)
         job = {"id": job_id, "status": "queued", "stage": "Waiting for the assistant"}
         with state_lock:
             jobs[job_id] = job

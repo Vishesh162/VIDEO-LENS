@@ -23,7 +23,7 @@ The adapter uses the project’s existing dependencies, FFmpeg, Whisper, and con
 
 ## Included interactions
 
-- File picker and drag-and-drop, supported-format and 50 MB validation.
+- File picker and drag-and-drop, supported-format and 150 MB validation.
 - YouTube link validation; English and Hinglish selection.
 - Actual job stages, cancellation, and errors that preserve the input.
 - Summary, searchable transcript, action items, decisions, and open questions.

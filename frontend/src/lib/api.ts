@@ -1,7 +1,7 @@
 import type { AnalysisJob, Language, VideoSession } from "./types";
 
 const API_BASE = (process.env.NEXT_PUBLIC_ASSISTANT_API_URL ?? (process.env.NODE_ENV === "production" ? "" : "http://127.0.0.1:8001")).replace(/\/$/u, "");
-export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
+export const MAX_UPLOAD_BYTES = 150 * 1024 * 1024;
 export const ACCEPTED_EXTENSIONS = ["mp4", "mov", "webm", "mkv", "mp3", "wav", "m4a", "ogg"];
 
 export function validateYoutube(value: string): string | null {

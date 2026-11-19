@@ -4,9 +4,11 @@ import sys
 import threading
 import time
 import types
+import tempfile
 import unittest
 import uuid
 from http.server import ThreadingHTTPServer
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
@@ -112,6 +114,33 @@ class AdapterTests(unittest.TestCase):
             while folder.exists() and time.monotonic() < deadline:
                 time.sleep(.02)
             self.assertFalse(folder.exists())
+
+    def test_incomplete_upload_cleans_partial_recording_and_releases_slot(self):
+        boundary = "incomplete-upload-test"
+        body = (
+            f"--{boundary}\r\nContent-Disposition: form-data; name=\"file\"; filename=\"meeting.mp4\""
+            "\r\nContent-Type: video/mp4\r\n\r\npartial recording with no ending boundary"
+        ).encode()
+        with tempfile.TemporaryDirectory() as folder, patch.object(api_server, "UPLOAD_ROOT", Path(folder)):
+            code, reply, _ = self.request(
+                "/api/analyze", body, headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+            )
+            self.assertEqual(code, 400)
+            self.assertIn("incomplete", reply["error"])
+            self.assertEqual(list(Path(folder).iterdir()), [])
+        self.assertTrue(api_server.upload_lock.acquire(blocking=False))
+        api_server.upload_lock.release()
+
+    def test_concurrent_upload_is_rejected_before_reading_large_body(self):
+        api_server.upload_lock.acquire()
+        try:
+            code, reply, _ = self.request(
+                "/api/analyze", b"not read", headers={"Content-Type": "multipart/form-data; boundary=test"},
+            )
+        finally:
+            api_server.upload_lock.release()
+        self.assertEqual(code, 429)
+        self.assertIn("uploading", reply["error"])
 
     def test_invalid_input_expired_session_and_cancellation(self):
         code, _, _ = self.request("/api/analyze", b'{"source":"https://unrelated.example/video"}', headers={"Content-Type": "application/json"})
