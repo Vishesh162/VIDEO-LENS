@@ -9,7 +9,7 @@ import { validateYoutube } from "@/lib/api";
 const REPO = "https://github.com/Vishesh162/VIDEO-LENS";
 const steps = [
   { title: "Get your copy", description: "Install Docker Desktop and Git first. Open a terminal, then clone the project.", command: "git clone https://github.com/Vishesh162/VIDEO-LENS.git\ncd VIDEO-LENS" },
-  { title: "Add your provider keys", description: "Copy the example, then open .env in your editor. Add GROQ_API_KEY for Whisper and ROUTIX_API_KEY for the existing DeepSeek model. Add SARVAM_API_KEY only for Hinglish.", command: "Copy-Item .env.example .env" },
+  { title: "Choose your AI model", description: "Copy the example, then open .env in your editor. Use any open model served through an OpenAI-compatible API: set LLM_API_KEY, LLM_MODEL, and LLM_BASE_URL from your provider. Add GROQ_API_KEY for Whisper and SARVAM_API_KEY only for Hinglish.", command: "Copy-Item .env.example .env" },
   { title: "Build your workspace", description: "Keep Docker Desktop running. The first build downloads the tools the app needs; later launches reuse them.", command: "docker build -t video-lens ." },
   { title: "Start it on your computer", description: "Run this from the project folder. Leave the terminal open while you work. Press Ctrl+C to stop.", command: "docker run --rm --env-file .env -p 127.0.0.1:8080:8080 video-lens" },
 ];
@@ -62,7 +62,7 @@ export function YoutubeLocalGuide() {
         <Link href="/workspace/" className="local-context-link"><Upload size={20} /><span>Have the file already?<small>Upload up to 150 MB online.</small></span><ArrowUpRight size={20} /></Link>
       </section>
       <section id="local-setup" className="local-setup">
-        <div className="local-setup-intro"><p className="local-eyebrow">01 / MAKE IT YOURS</p><h2>Four steps.<br />One familiar<br /><em>workspace.</em></h2><p>Docker keeps Python, FFmpeg, and the frontend together. Groq handles Whisper transcription; your DeepSeek model still writes the notes and answers.</p>
+        <div className="local-setup-intro"><p className="local-eyebrow">01 / MAKE IT YOURS</p><h2>Four steps.<br />One familiar<br /><em>workspace.</em></h2><p>Docker keeps Python, FFmpeg, and the frontend together. Groq handles Whisper transcription; choose your own OpenAI-compatible model API for the notes and answers.</p>
           <div className="local-platform" role="group" aria-label="Setup operating system"><button type="button" aria-pressed={platform === "windows"} onClick={() => setPlatform("windows")}>Windows</button><button type="button" aria-pressed={platform === "unix"} onClick={() => setPlatform("unix")}>macOS / Linux</button></div>
           <div className="local-prerequisites"><a href="https://docs.docker.com/get-started/get-docker/" target="_blank" rel="noopener noreferrer">Get Docker Desktop<ExternalLink size={13} /></a><a href="https://git-scm.com/downloads" target="_blank" rel="noopener noreferrer">Get Git<ExternalLink size={13} /></a><a href={REPO + "/archive/refs/heads/main.zip"}>Download source ZIP<ArrowDown size={13} /></a></div>
           <p className="local-note">Using the ZIP? Extract it and open a terminal in its VIDEO-LENS-main folder, then start at step 02.</p>

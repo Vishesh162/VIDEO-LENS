@@ -9,15 +9,6 @@ from core.llm import get_llm
 
 import os
 
-def get_llm():
-    return ChatOpenAI(
-        model="deepseek-v4-flash-0731",
-        api_key=os.getenv("ROUTIX_API_KEY"),
-        base_url="https://routixai.online/v1", 
-        temperature=0.3,
-
-    )
-
 def build_chain(system_prompt : str):
     llm = get_llm()
     return (

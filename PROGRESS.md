@@ -90,3 +90,11 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - Added layered CSS 3D cards, responsive layouts, raised buttons with hover/press feedback, visible keyboard focus, and reduced-motion handling using the existing green palette and local fonts.
 - Added a root README describing local Docker setup and provider keys. Local mode still uses Groq and DeepSeek unless configured otherwise; YouTube access is not guaranteed.
 - Production frontend build and all 18 Chrome interaction checks passed, including clipboard contents, operating-system commands, local links, URL prefilling, and desktop/mobile layout. Desktop and mobile screenshots were visually reviewed.
+
+## Configurable notes/chat model provider
+
+- Public setup instructions now use LLM_API_KEY, LLM_MODEL, and LLM_BASE_URL for any OpenAI-compatible chat API. GROQ_API_KEY remains separate for Whisper.
+- Existing DeepSeek deployments retain the original configuration when generic settings are unset. Incomplete generic settings fail before creating a provider client to prevent sending credentials to the wrong endpoint.
+- Removed the duplicate extractor model factory so summary, actions, decisions, questions, and chat share the chosen provider.
+- Added a project overview, feature list, architecture description, model configuration, and local/deployment instructions to README.md. Updated the frontend guide, privacy copy, environment template, and Render blueprint.
+- Python regressions: 38 tests and 10 subtests passed, including custom provider settings and existing DeepSeek compatibility.
