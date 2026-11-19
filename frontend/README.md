@@ -1,6 +1,6 @@
-# AI Video Assistant frontend
+# Video Lens frontend
 
-An original Next.js interface for the existing Python video assistant. It uses Onest, a dark green and bone palette, Motion for React, and Taste Skill’s entrance, hover, and letters-assemble motion. The Onda reference informed animation pacing; its website content and source were not copied.
+An original Next.js interface for the Video Lens Python backend. It uses Onest, a dark green and bone palette, Motion for React, and Taste Skill’s entrance, hover, and letters-assemble motion. The Onda reference informed animation pacing; its website content and source were not copied.
 
 ## Run
 

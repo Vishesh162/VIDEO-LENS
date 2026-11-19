@@ -1,5 +1,7 @@
 "use client";
 
+import { SITE_NAME } from "@/lib/site";
+
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowUp, Check, Copy, MessageSquare, Sparkles } from "lucide-react";
@@ -42,11 +44,11 @@ export function AssistantChat({ session, small = false }: { session: VideoSessio
     catch { setError("Copy is unavailable in this browser. Select the answer to copy it."); }
   }
 
-  return <aside className={`assistant-chat${small ? " assistant-chat--small" : ""}`} aria-label="Video assistant">
+  return <aside className={`assistant-chat${small ? " assistant-chat--small" : ""}`} aria-label={SITE_NAME}>
     <div className="chat-header"><span className="assistant-glyph"><Sparkles size={17} /></span><div><p>Ask your video</p><span>Answers from the transcript</span></div><span className="chat-ready"><span /> Ready</span></div>
     <div className="chat-messages" aria-live="polite" aria-relevant="additions">
       {!messages.length && <div className="chat-intro"><div className="chat-intro-icon"><MessageSquare size={23} strokeWidth={1.3} /></div><h3>There’s more in the video.</h3><p>Ask a question, follow a thought, or find the part you missed.</p><div className="chat-suggestions">{suggestedQuestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => void ask(suggestion)}>{suggestion}<ArrowUp size={14} /></button>)}</div>{session.source_kind === "walkthrough" && !small && <p className="walkthrough-explanation">You’re trying the field-notes walkthrough. Upload a video to ask about your own recording.</p>}</div>}
-      <AnimatePresence initial={false}>{messages.map((message) => <motion.div className={`chat-message chat-message--${message.role}`} key={message.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}><span className="chat-message-who">{message.role === "user" ? "You" : "Video assistant"}</span><p>{message.text}</p>{message.role === "assistant" && <div className="chat-message-footer"><span>{message.citation || "Based on this transcript"}</span><button className="icon-button" type="button" aria-label={copied === message.id ? "Answer copied" : "Copy answer"} onClick={() => void copy(message)}>{copied === message.id ? <Check size={14} /> : <Copy size={14} />}</button></div>}</motion.div>)}</AnimatePresence>
+      <AnimatePresence initial={false}>{messages.map((message) => <motion.div className={`chat-message chat-message--${message.role}`} key={message.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}><span className="chat-message-who">{message.role === "user" ? "You" : SITE_NAME}</span><p>{message.text}</p>{message.role === "assistant" && <div className="chat-message-footer"><span>{message.citation || "Based on this transcript"}</span><button className="icon-button" type="button" aria-label={copied === message.id ? "Answer copied" : "Copy answer"} onClick={() => void copy(message)}>{copied === message.id ? <Check size={14} /> : <Copy size={14} />}</button></div>}</motion.div>)}</AnimatePresence>
       {pending && <p className="chat-thinking" role="status"><span className="loading-ring" /> Reading the transcript…</p>}
       <div ref={bottom} />
     </div>

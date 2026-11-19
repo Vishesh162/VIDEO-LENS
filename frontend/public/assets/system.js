@@ -71,7 +71,7 @@ const kindOther = () => {
 
 function nav() {
   const nav = document.querySelector('.nav');
-  if (!nav) return;
+  if (!nav || nav.classList.contains('site-header')) return;
   const toggle = nav.querySelector('.nav__toggle');
   const bars = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M2 5h14M2 13h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
   const cross = '<svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true"><path d="M4 4l10 10M14 4L4 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';

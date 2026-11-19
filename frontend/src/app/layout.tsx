@@ -1,20 +1,23 @@
 import type { Metadata, Viewport } from "next";
 import { Providers } from "@/components/providers";
+import { SITE_NAME } from "@/lib/site";
 import "./globals.css";
 import "./youtube-local.css";
+import "./site-header.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
-  title: { default: "AI Video Assistant — Video notes for curious minds", template: "%s · AI Video Assistant" },
-  description: "Turn a video or a YouTube link into a transcript, a summary, decisions, and answers. An AI video assistant for meetings, lectures, and everything worth remembering.",
+  title: { default: SITE_NAME, template: `%s · ${SITE_NAME}` },
+  description: `${SITE_NAME} turns videos into transcripts, summaries, decisions, and answers for meetings, lectures, and everything worth remembering.`,
   icons: { icon: "/favicon.svg" },
   openGraph: {
-    title: "AI Video Assistant — Keep the useful parts",
+    title: SITE_NAME,
+    siteName: SITE_NAME,
     description: "Your recordings, transcribed, summarized, and ready for questions.",
     type: "website",
-    images: [{ url: "/share.jpg", width: 1440, height: 900, alt: "AI Video Assistant workspace" }],
+    images: [{ url: "/share.jpg", width: 1440, height: 900, alt: `${SITE_NAME} workspace` }],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary_large_image", title: SITE_NAME },
   other: { "page-type": "software", "site-kind": "software" },
 };
 

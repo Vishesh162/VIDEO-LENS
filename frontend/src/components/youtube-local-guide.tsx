@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { ArrowDown, ArrowLeft, ArrowUpRight, Check, ChevronRight, Copy, ExternalLink, FileText, Github, Laptop, Play, Terminal, Upload, Youtube } from "lucide-react";
 import { Brand } from "./brand";
+import { SITE_NAME } from "@/lib/site";
 import { validateYoutube } from "@/lib/api";
 
 const REPO = "https://github.com/Vishesh162/VIDEO-LENS";
@@ -56,7 +57,7 @@ export function YoutubeLocalGuide() {
           <span className="local-floating-tag"><Youtube size={17} />YouTube → your workspace</span>
         </div>
       </section>
-      <section className="local-context" aria-label="Choose how to use Video Lens">
+      <section className="local-context" aria-label={`Choose how to use ${SITE_NAME}`}>
         <div><span className="local-section-index">WHY LOCAL?</span><h2>A different route<br />for your links.</h2></div>
         <p>YouTube sometimes refuses downloads from shared cloud servers. Running locally uses your computer’s internet connection instead. It can help, but private, restricted, or blocked videos may still fail.</p>
         <Link href="/workspace/" className="local-context-link"><Upload size={20} /><span>Have the file already?<small>Upload up to 150 MB online.</small></span><ArrowUpRight size={20} /></Link>

@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Script from "next/script";
 import { Arrow } from "@/components/arrow";
+import { SITE_NAME } from "@/lib/site";
+import { SiteHeader } from "@/components/site-header";
 import { Brand } from "@/components/brand";
 import { HeroCollage, Waveform } from "@/components/hero-collage";
 import { ProductPreview } from "@/components/product-preview";
@@ -16,21 +18,7 @@ const questions = [
 
 export default function Home() {
   return <>
-    <header className="nav nav--centre">
-      <div className="wrap nav__bar">
-        <a className="skip-link" href="#top">Skip to content</a>
-        <Brand href="#top" />
-        <nav className="nav__links" aria-label="Main navigation">
-          <div className="nav__item"><a className="nav__link" href="#product">Product</a></div>
-          <div className="nav__item"><a className="nav__link" href="#capabilities">Capabilities</a></div>
-          <div className="nav__item"><a className="nav__link" href="#workflow">Workflow</a></div>
-          <div className="nav__item"><a className="nav__link" href="#questions">Questions</a></div>
-          <div className="nav__item"><Link className="nav__link" href="/youtube/">YouTube locally</Link></div>
-        </nav>
-        <div className="nav__actions"><Link className="btn btn--primary" href="/workspace/">Open the workspace<Arrow diagonal /></Link></div>
-        <button className="nav__toggle" type="button" aria-expanded="false" aria-label="Open navigation menu"><span /><span /></button>
-      </div>
-    </header>
+    <SiteHeader />
 
     <main id="top">
       <section className="hero hero--triptych" data-enter aria-labelledby="hero-h">
@@ -43,7 +31,7 @@ export default function Home() {
           </div>
           <HeroCollage />
           <div className="span-3 start-10 hero__cta">
-            <span className="hero-side-index">01 / Your video assistant</span>
+            <span className="hero-side-index">01 / {SITE_NAME}</span>
             <p className="hero-side-title">Less replay.<br />More room<br />for thought.</p>
             <Link className="btn btn--primary" href="/workspace/">Open the workspace<Arrow diagonal /></Link>
             <p className="hero-side-note">YouTube links or your own files.<br />2 languages: English + Hinglish.</p>
@@ -88,7 +76,7 @@ export default function Home() {
 
     <footer className="footer closing" id="contact" aria-labelledby="close-h"><div className="wrap">
       <div className="closing__cta close--type"><div className="section-head"><h2 id="close-h">Give your next video<br />a second thought.</h2><p className="t-lead">Start with the recording. Keep the notes you need.</p></div><Link className="btn btn--primary btn--xl" href="/workspace/">Open the workspace<Arrow diagonal /></Link></div>
-      <div className="closing__links"><div className="grid"><div className="span-6 footer-brand"><Brand href="#top" /><p className="footer__lede">For everything worth remembering.</p></div><div className="span-3 footer__col"><h3>The assistant</h3><ul><li><a href="#product">Product</a></li><li><a href="#capabilities">Capabilities</a></li><li><a href="#workflow">Workflow</a></li></ul></div><div className="span-3 footer__col"><h3>Take a look</h3><ul><li><a href="#questions">Questions</a></li><li><Link href="/workspace/?walkthrough=1">Walkthrough</Link></li><li><Link href="/privacy/">Your data</Link></li></ul></div></div><div className="footer__legal"><span>© 2026 AI Video Assistant</span><span>Made for your next thought.</span><details className="credits"><summary>Video via MDN Web Docs</summary><p>The flower video and its poster use MDN’s CC0 demonstration footage. The walkthrough notes are authored for this interface.</p></details></div></div>
+      <div className="closing__links"><div className="grid"><div className="span-6 footer-brand"><Brand href="#top" /><p className="footer__lede">For everything worth remembering.</p></div><div className="span-3 footer__col"><h3>The assistant</h3><ul><li><a href="#product">Product</a></li><li><a href="#capabilities">Capabilities</a></li><li><a href="#workflow">Workflow</a></li></ul></div><div className="span-3 footer__col"><h3>Take a look</h3><ul><li><a href="#questions">Questions</a></li><li><Link href="/workspace/?walkthrough=1">Walkthrough</Link></li><li><Link href="/privacy/">Your data</Link></li></ul></div></div><div className="footer__legal"><span>© 2026 {SITE_NAME}</span><span>Made for your next thought.</span><details className="credits"><summary>Video via MDN Web Docs</summary><p>The flower video and its poster use MDN’s CC0 demonstration footage. The walkthrough notes are authored for this interface.</p></details></div></div>
     </div></footer>
     <Script src="/assets/system.js" type="module" strategy="afterInteractive" />
     <Script src="/assets/motion/motion.js" type="module" strategy="afterInteractive" />

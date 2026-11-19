@@ -98,3 +98,10 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - Removed the duplicate extractor model factory so summary, actions, decisions, questions, and chat share the chosen provider.
 - Added a project overview, feature list, architecture description, model configuration, and local/deployment instructions to README.md. Updated the frontend guide, privacy copy, environment template, and Render blueprint.
 - Python regressions: 38 tests and 10 subtests passed, including custom provider settings and existing DeepSeek compatibility.
+
+## Video Lens branding and responsive header
+
+- Centralized frontend brand text in src/lib/site.ts. The shared wordmark now reads video lens without the ai superscript; existing bars, colors, fonts, and Motion assets remain unchanged.
+- Updated metadata, OpenGraph/Twitter titles, image alt text, hero side label, footer, chat/preview accessibility names, privacy copy, and frontend README. The root README already used Video Lens.
+- Added an isolated React header with desktop navigation at 1024px+, a tablet menu with visible workspace button at 768-1023px, and mobile menu including the workspace action below 768px. Menu keyboard handling traps focus, closes with Escape, and returns focus to its trigger.
+- Production build passed and Chrome interaction checks passed 23/23. At 320/375px the hero stacks headline, cards, CTA without horizontal scroll; at 768px logo/CTA/menu fit; at 1024/1440px all five nav links fit without overlap. Browser title verified as Video Lens. Screenshots were visually inspected at each requested width.

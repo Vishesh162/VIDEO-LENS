@@ -53,6 +53,58 @@ try {
   await send('Browser.setDownloadBehavior', { behavior:'allow', downloadPath:downloads });
   await send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
   await navigate('/');
+  for (const width of [320,375,768,1024,1440]) {
+    await send('Emulation.setDeviceMetricsOverride',{width,height:900,deviceScaleFactor:1,mobile:width<768});
+    await navigate('/');
+    await check(`Video Lens header and hero at ${width}px`, async()=>{
+      assert.equal(await evaluate('document.title'),'Video Lens');
+      assert.equal(await evaluate('document.querySelector(".site-header .brand-name").textContent'),'video lens');
+      assert.equal(await evaluate('document.querySelectorAll(".brand-ai").length'),0);
+      assert(await evaluate('document.documentElement.scrollWidth <= innerWidth'), 'Horizontal page overflow');
+      const dimensions=await evaluate(`(() => {
+        const box=s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,width:r.width,height:r.height,bottom:r.bottom,right:r.right}};
+        const visible=s=>{const e=document.querySelector(s);return getComputedStyle(e).display!=="none"&&e.getBoundingClientRect().width>0};
+        return {name:box(".site-header .brand-name"),desktop:visible(".site-desktop-links"),cta:visible(".site-header-workspace"),menu:visible(".site-menu-toggle"),head:box(".hero__text"),cards:box(".hero-collage"),heroCta:box(".hero__cta")};
+      })()`);
+      assert(dimensions.name.right <= width && dimensions.name.height < 35, 'Wordmark wraps or overflows');
+      assert.equal(dimensions.desktop,width>=1024);
+      assert.equal(dimensions.menu,width<1024);
+      assert.equal(dimensions.cta,width>=768);
+      if(width>=1024){
+        assert(await evaluate(`(() => {
+          const links=[...document.querySelectorAll(".site-desktop-links a")];
+          const name=document.querySelector(".site-header .brand").getBoundingClientRect();
+          const cta=document.querySelector(".site-header-workspace").getBoundingClientRect();
+          return name.right<=links[0].getBoundingClientRect().left&&links.at(-1).getBoundingClientRect().right<=cta.left;
+        })()`),'Desktop navigation overlaps the wordmark or workspace button');
+      }
+      if(width<768){
+        assert(dimensions.head.bottom<=dimensions.cards.y+1,'Cards precede headline');
+        assert(dimensions.cards.bottom<=dimensions.heroCta.y+1,'CTA precedes cards');
+      }
+      if(width<1024){
+        await evaluate('document.querySelector(".site-menu-toggle").click()');
+        await waitFor('document.querySelector(".site-menu-toggle").getAttribute("aria-expanded")==="true"','Menu did not open');
+        assert(await evaluate('!document.querySelector("#site-navigation-panel").hidden'));
+        await evaluate('(()=>{const links=[...document.querySelectorAll("#site-navigation-panel a")].filter(a=>a.getClientRects().length);links.at(-1).focus()})()');
+        await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab'});
+        await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab'});
+        assert(await evaluate('document.activeElement===document.querySelector(".site-menu-toggle")'),'Focus escaped menu forwards');
+        await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',modifiers:8});
+        await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',modifiers:8});
+        assert(await evaluate('document.querySelector("#site-navigation-panel").contains(document.activeElement)'),'Focus escaped menu backwards');
+        await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Escape',code:'Escape'});
+        await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Escape',code:'Escape'});
+        await waitFor('document.querySelector(".site-menu-toggle").getAttribute("aria-expanded")==="false"','Escape did not close menu');
+        assert(await evaluate('document.activeElement===document.querySelector(".site-menu-toggle")'));
+      }
+      const shot=await send('Page.captureScreenshot',{format:'png'});
+      fs.writeFileSync(path.resolve(`../.web_uploads/rebrand-${width}.png`),Buffer.from(shot.data,'base64'));
+      console.log(`  ${width}px: ${JSON.stringify(dimensions)}`);
+    });
+  }
+  await send('Emulation.setDeviceMetricsOverride',{width:1440,height:900,deviceScaleFactor:1,mobile:false});
+  await navigate('/');
   await check('landing assets and navigation',async()=>{assert.equal(await evaluate('document.querySelector("h1").textContent'),'AI video notes for busy minds.');assert(await evaluate('document.fonts.check("400 16px Onest")'));assert(await evaluate('[...document.querySelectorAll("img")].every(image=>image.complete&&image.naturalWidth>0)'));assert(await evaluate('document.querySelector("a[href=\\"/workspace/\\"]") !== null'));});
   await check('preview panel visibility and tab relationships',async()=>{assert(await evaluate('[...document.querySelectorAll(".notes-tab")].every(tab=>document.getElementById(tab.getAttribute("aria-controls")))'));assert(await evaluate('!document.querySelector(".notes-scroll").hidden && document.querySelector(".notes-scroll").getBoundingClientRect().height > 100'));await evaluate('[...document.querySelectorAll(".notes-tab")].find(tab=>tab.textContent==="Transcript").click()');await waitFor('!!document.querySelector(".transcript-search") && !document.querySelector(".notes-scroll").hidden','Transcript panel stayed hidden');});
   await check('notes keyboard navigation',async()=>{await evaluate('[...document.querySelectorAll(".notes-tab")].find(tab=>tab.textContent==="Transcript").focus()');await send('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight'});await send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight'});await waitFor('document.querySelector(".notes-tab[aria-selected=true]")?.textContent === "Actions" && !!document.querySelector(".action-item")','Arrow key did not open Actions');assert(await evaluate('!document.querySelector(".notes-scroll").hidden'));});
@@ -118,7 +170,7 @@ try {
   });
   await navigate('/');
   await check('mobile layout and reduced motion',async()=>{assert(await evaluate('document.documentElement.scrollWidth <= innerWidth'));assert(await evaluate('getComputedStyle(document.querySelector("h1")).opacity !== "0"'));assert(await evaluate('document.querySelector(".hero__cta .btn").getBoundingClientRect().bottom <= innerHeight'));});
-  await check('mobile navigation and video touch targets',async()=>{assert(await evaluate('[...document.querySelectorAll(".hero-video .video-controls button, .hero-video .video-controls input")].every(control=>control.getBoundingClientRect().height >= 44)'));await evaluate('document.querySelector(".nav__toggle").click()');assert(await evaluate('document.querySelector(".nav__toggle").getAttribute("aria-expanded") === "true"'));await evaluate('document.querySelector(".nav__toggle").click()');assert(await evaluate('document.querySelector(".nav__toggle").getAttribute("aria-expanded") === "false"'));});
+  await check('mobile navigation and video touch targets',async()=>{assert(await evaluate('[...document.querySelectorAll(".hero-video .video-controls button, .hero-video .video-controls input")].every(control=>control.getBoundingClientRect().height >= 44)'));await evaluate('document.querySelector(".site-menu-toggle").click()');assert(await evaluate('document.querySelector(".site-menu-toggle").getAttribute("aria-expanded") === "true"'));await evaluate('document.querySelector(".site-menu-toggle").click()');assert(await evaluate('document.querySelector(".site-menu-toggle").getAttribute("aria-expanded") === "false"'));});
   console.log(`\n${checks-failures.length}/${checks} interaction checks passed.`);
   if(failures.length) process.exitCode=1;
 } finally {
