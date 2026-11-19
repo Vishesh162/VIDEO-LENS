@@ -56,6 +56,31 @@ try {
   await check('landing assets and navigation',async()=>{assert.equal(await evaluate('document.querySelector("h1").textContent'),'AI video notes for busy minds.');assert(await evaluate('document.fonts.check("400 16px Onest")'));assert(await evaluate('[...document.querySelectorAll("img")].every(image=>image.complete&&image.naturalWidth>0)'));assert(await evaluate('document.querySelector("a[href=\\"/workspace/\\"]") !== null'));});
   await check('preview panel visibility and tab relationships',async()=>{assert(await evaluate('[...document.querySelectorAll(".notes-tab")].every(tab=>document.getElementById(tab.getAttribute("aria-controls")))'));assert(await evaluate('!document.querySelector(".notes-scroll").hidden && document.querySelector(".notes-scroll").getBoundingClientRect().height > 100'));await evaluate('[...document.querySelectorAll(".notes-tab")].find(tab=>tab.textContent==="Transcript").click()');await waitFor('!!document.querySelector(".transcript-search") && !document.querySelector(".notes-scroll").hidden','Transcript panel stayed hidden');});
   await check('notes keyboard navigation',async()=>{await evaluate('[...document.querySelectorAll(".notes-tab")].find(tab=>tab.textContent==="Transcript").focus()');await send('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight'});await send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight'});await waitFor('document.querySelector(".notes-tab[aria-selected=true]")?.textContent === "Actions" && !!document.querySelector(".action-item")','Arrow key did not open Actions');assert(await evaluate('!document.querySelector(".notes-scroll").hidden'));});
+  await navigate('/youtube/');
+  await check('local YouTube guide, source links, OS commands and clipboard', async () => {
+    assert.equal(await evaluate('document.querySelectorAll(".local-step").length'), 4);
+    assert(await evaluate('[...document.querySelectorAll("a")].some(a=>a.href==="https://github.com/Vishesh162/VIDEO-LENS")'));
+    await evaluate('document.querySelectorAll(".local-platform button")[1].click()');
+    await waitFor('document.querySelectorAll(".local-command code")[1].textContent === "cp .env.example .env"', 'macOS / Linux command did not update');
+    await evaluate('document.querySelectorAll(".local-platform button")[0].click()');
+    await waitFor('document.querySelectorAll(".local-command code")[1].textContent === "Copy-Item .env.example .env"', 'Windows command did not update');
+    await send('Browser.grantPermissions', { origin: base, permissions: ['clipboardReadWrite','clipboardSanitizedWrite'] });
+    await send('Page.bringToFront');
+    await evaluate('document.querySelector(".local-command button").click()');
+    await waitFor('document.querySelector(".local-command button").textContent.includes("Copied")', 'Command copy did not report success');
+    assert.equal((await evaluate('navigator.clipboard.readText()')).replaceAll('\r\n','\n'), 'git clone https://github.com/Vishesh162/VIDEO-LENS.git\ncd VIDEO-LENS');
+    await evaluate('(()=>{const input=document.querySelector("#local-youtube");Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(input,"https://youtu.be/abcdefghijk");input.dispatchEvent(new Event("input",{bubbles:true}));})()');
+    await waitFor('document.querySelector(".local-open-workspace").href.includes("abcdefghijk")', 'YouTube URL was not carried to the local workspace');
+    assert.equal(await evaluate('new URL(document.querySelector(".local-open-workspace").href).origin'), 'http://127.0.0.1:8080');
+    assert(await evaluate('document.documentElement.scrollWidth <= innerWidth'));
+    const shot=await send('Page.captureScreenshot', {format:'png'});
+    fs.writeFileSync(path.resolve('../.web_uploads/youtube-guide-desktop.png'),Buffer.from(shot.data,'base64'));
+  });
+  await navigate('/workspace/?source=youtube&url=https%3A%2F%2Fyoutu.be%2Fabcdefghijk');
+  await check('local YouTube deep link prefills the existing analysis form',async()=>{
+    await waitFor('document.querySelector("#youtube-url")?.value.includes("abcdefghijk")','YouTube deep link did not prefill');
+    assert.equal(await evaluate('document.querySelector(".youtube-local-shortcut").getAttribute("href")'), '/youtube/');
+  });
   await navigate('/workspace/');
   await check('upload validation',async()=>{await evaluate('document.querySelector(".analyze-button").click()');await waitFor('document.querySelector(".upload-error")?.textContent.includes("Choose a recording")','Empty upload did not show an error');});
   await check('YouTube validation',async()=>{await evaluate('document.querySelectorAll(".source-tabs button")[1].click()');await sleep(100);await evaluate('(()=>{const input=document.querySelector("#youtube-url");Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,"value").set.call(input,"https://unrelated.example/video");input.dispatchEvent(new Event("input",{bubbles:true}));})()');await evaluate('document.querySelector(".analyze-button").click()');await waitFor('document.querySelector(".upload-error")?.textContent.includes("valid HTTPS YouTube")','Invalid YouTube link was accepted');});
@@ -83,6 +108,14 @@ try {
     assert.equal(await evaluate('document.querySelectorAll(".studio-sidebar, .library-item, .mobile-library-toggle").length'), 0);
   });
   await send('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});
+  await navigate('/youtube/');
+  await check('mobile local guide and reduced motion',async()=>{
+    assert(await evaluate('document.documentElement.scrollWidth <= innerWidth'));
+    assert(await evaluate('document.querySelector(".local-platform button").getBoundingClientRect().height >= 40'));
+    assert(await evaluate('document.querySelector(".local-open-workspace").getBoundingClientRect().width > 200'));
+    const shot=await send('Page.captureScreenshot', {format:'png'});
+    fs.writeFileSync(path.resolve('../.web_uploads/youtube-guide-mobile.png'),Buffer.from(shot.data,'base64'));
+  });
   await navigate('/');
   await check('mobile layout and reduced motion',async()=>{assert(await evaluate('document.documentElement.scrollWidth <= innerWidth'));assert(await evaluate('getComputedStyle(document.querySelector("h1")).opacity !== "0"'));assert(await evaluate('document.querySelector(".hero__cta .btn").getBoundingClientRect().bottom <= innerHeight'));});
   await check('mobile navigation and video touch targets',async()=>{assert(await evaluate('[...document.querySelectorAll(".hero-video .video-controls button, .hero-video .video-controls input")].every(control=>control.getBoundingClientRect().height >= 44)'));await evaluate('document.querySelector(".nav__toggle").click()');assert(await evaluate('document.querySelector(".nav__toggle").getAttribute("aria-expanded") === "true"'));await evaluate('document.querySelector(".nav__toggle").click()');assert(await evaluate('document.querySelector(".nav__toggle").getAttribute("aria-expanded") === "false"'));});

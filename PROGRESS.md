@@ -82,3 +82,11 @@ Updated 2026-11-18 from local source inspection and executed checks.
 - Full-size generated 150 MiB upload parser test passed with under 4 MiB measured Python peak allocation. Regressions: 34 tests and 7 subtests passed; browser checks 15/15 passed; frontend and Docker builds passed.
 - Real 150 MiB multipart request through the Docker/Nginx API passed under a 512 MiB container memory cap, followed by FFmpeg decoding, Groq Whisper, DeepSeek notes, and chat. The file contained short generated speech with valid media-container padding: this validates file-size handling, not long-duration performance. Container memory after analysis was 154 MiB.
 - Whisper still receives sequential mono 16 kHz audio chunks below its 25 MiB upload limit. Long recordings still take longer and remain subject to provider rate limits.
+
+## YouTube local setup page
+
+- Added /youtube/ with GitHub source/ZIP links, four Docker setup steps, Windows and macOS/Linux command switching, copy controls, and an optional YouTube URL handoff to the local workspace.
+- Linked the guide from the landing-page navigation, workspace header, and YouTube form. The workspace validates and prefills incoming YouTube links without starting analysis automatically.
+- Added layered CSS 3D cards, responsive layouts, raised buttons with hover/press feedback, visible keyboard focus, and reduced-motion handling using the existing green palette and local fonts.
+- Added a root README describing local Docker setup and provider keys. Local mode still uses Groq and DeepSeek unless configured otherwise; YouTube access is not guaranteed.
+- Production frontend build and all 18 Chrome interaction checks passed, including clipboard contents, operating-system commands, local links, URL prefilling, and desktop/mobile layout. Desktop and mobile screenshots were visually reviewed.

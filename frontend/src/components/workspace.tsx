@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { AlertCircle, ArrowRight, ArrowUpRight, Check, Copy, Download, FileVideo, Headphones, Link2, ListTodo, MessageSquare, Plus, Sparkles, Upload, X, Youtube } from "lucide-react";
 import clsx from "clsx";
@@ -37,6 +38,12 @@ export function Workspace() {
   useEffect(() => {
     // Remove storage left by the retired browser library. Notes now stay in this tab only.
     try { localStorage.removeItem("ai-video-assistant:library:v1"); } catch { /* Storage may be disabled. */ }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("source") === "youtube") {
+      setSource("youtube");
+      const link = validateYoutube(params.get("url") || "");
+      if (link) setYoutube(link);
+    }
     if (new URLSearchParams(window.location.search).has("walkthrough")) { setSession(walkthrough); setMedia("/media/field-notes.mp4"); }
     return () => { abort.current?.abort(); if (objectUrl.current) URL.revokeObjectURL(objectUrl.current); if (toastTimer.current) clearTimeout(toastTimer.current); };
   }, []);
@@ -84,6 +91,7 @@ export function Workspace() {
 
   return <div className="workspace-shell">
     <header className="studio-nav"><a className="skip-link" href="#workspace-main">Skip to workspace</a><Brand /><span className="studio-breadcrumb">Workspace</span><div className="studio-nav-actions">
+      <Link className="studio-text-button studio-youtube-guide" href="/youtube/"><Youtube size={15} /><span>YouTube · Local setup</span></Link>
       <button type="button" className="studio-text-button" onClick={openWalkthrough} disabled={busy}><Sparkles size={14} />Try the walkthrough</button>{session && <button type="button" className="studio-text-button" onClick={newVideo} disabled={busy} aria-label="Add a new video"><Plus size={15} /><span>Add a video</span></button>}</div></header>
     <div className="studio-layout">
       <main id="workspace-main" className="studio-main">
@@ -100,6 +108,7 @@ export function Workspace() {
               {source === "file" ? <div className={clsx("drop-area", dragging && "is-dragging")} onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); selectFile(event.dataTransfer.files[0]); }}><input id="video-file" ref={fileInput} type="file" className="sr-only" accept={ACCEPTED_EXTENSIONS.map((extension) => `.${extension}`).join(",")} onChange={(event) => { selectFile(event.target.files?.[0]); event.target.value = ""; }} aria-describedby={error ? "upload-error" : "file-formats"} /><label className="sr-only" htmlFor="video-file">Choose a video or audio recording</label>{file ? <div className="file-selected"><FileVideo size={38} strokeWidth={1.3} /><div className="selected-file-meta"><p>{file.name}</p><span>{(file.size / 1024 / 1024).toFixed(1)} MB · Ready to analyze</span></div><button type="button" className="icon-button" aria-label="Remove selected file" onClick={() => setFile(null)}><X size={16} /></button></div> : <><span className="drop-icon"><Upload size={24} strokeWidth={1.3} /></span><p>Drop your recording here, or <button type="button" className="choose-file" onClick={() => fileInput.current?.click()}>choose a file</button></p><span id="file-formats">MP4, MOV, WebM, MKV, MP3, WAV, M4A, OGG<br />Up to 150 MB</span></>}</div>
               : <div className="youtube-field"><label htmlFor="youtube-url">YouTube video link</label><div className="youtube-input"><Youtube size={20} /><input id="youtube-url" ref={urlInput} type="url" value={youtube} autoComplete="off" placeholder="https://www.youtube.com/watch?v=…" onChange={(event) => setYoutube(event.target.value)} aria-invalid={!!error} aria-describedby={error ? "upload-error" : "youtube-help"} /></div><p id="youtube-help">Paste a public video link. If YouTube blocks the download, upload the video or audio file instead.</p></div>}
               <div className="upload-settings"><label className="language-field" htmlFor="video-language"><span>Recording language</span><select id="video-language" value={language} onChange={(event) => setLanguage(event.target.value as Language)}><option value="english">English</option><option value="hinglish">Hinglish</option></select></label><button type="submit" className="analyze-button">Analyze video<ArrowUpRight size={17} /></button></div>
+              {source === "youtube" && <Link className="youtube-local-shortcut" href={`/youtube/`}><span><Youtube size={17} /><span>Prefer running YouTube links locally?<small>Get the code and follow the setup guide.</small></span></span><ArrowUpRight size={18} /></Link>}
               {error && <p className="upload-error" id="upload-error" role="alert"><AlertCircle size={16} /><span>{error}</span></p>}
             </form><div className="walkthrough-prompt"><Sparkles size={15} /><span>Curious how it feels? Take the field-notes walkthrough.</span><button type="button" onClick={openWalkthrough}>Open walkthrough<ArrowRight size={14} /></button></div>
           </motion.div>}

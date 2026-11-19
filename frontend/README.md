@@ -13,6 +13,10 @@ npm run dev
 
 Open http://127.0.0.1:3000. The landing page links to `/workspace/`; **Try the walkthrough** works without the Python server or model credentials.
 
+The /youtube/ page includes a local Docker setup guide, GitHub source and ZIP links,
+copyable Windows/macOS/Linux commands, and a YouTube link handoff to the local
+workspace. See the root README.md for the complete local workflow.
+
 For real video analysis, open a second terminal in the project root:
 
 ```powershell
